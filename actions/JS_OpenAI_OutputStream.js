@@ -85,7 +85,7 @@ body:JSON.stringify({
     }
 
     // Initialize Mendix object field if needed
-    responseStream.set("OutputText", "");
+    outputStream.set("OutputText", "");
 
     while (!done) {
         const { value, done: streamDone } = await reader.read();
@@ -105,14 +105,14 @@ body:JSON.stringify({
                     const delta = parsed.choices?.[0]?.delta?.content;
                     if (delta) {
                         // Append streamed text into Mendix object
-                        responseStream.set("OutputText", responseStream.get("OutputText") + delta);
+                        outputStream.set("OutputText", outputStream.get("OutputText") + delta);
                     }
                 } catch (e) {
                     console.error("Failed to parse chunk:", e);
                 }
             }
 		mx.data.commit({
-			mxobj: responseStream,
+			mxobj: outputStream,
 			callback: function() {
 				console.log("Final streaming text committed.");
 			}
