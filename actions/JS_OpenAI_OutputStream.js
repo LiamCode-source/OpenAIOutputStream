@@ -71,6 +71,9 @@ body:JSON.stringify({
         const errorText = await response.text().catch(() => "");
         const message = `Request failed (${response.status} ${response.statusText})\n${errorText}`;
         console.error(message);
+        if (showProgressBar) {
+            mx.ui.hideProgress(Number(idProg));
+        }
         // Stop execution
         return false;
         }
