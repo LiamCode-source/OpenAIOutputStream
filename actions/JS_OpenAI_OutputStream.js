@@ -14,19 +14,21 @@ import { Big } from "big.js";
 /**
  * Takes a text input and streams out the output
  * @param {MxObject} outputStream - Object that stores output text
+ * @param {"OpenAIOutputStream.ENUM_OpenAI_Type.AzureOpenAI"|"OpenAIOutputStream.ENUM_OpenAI_Type.OpenAI"} apiType
  * @param {string} inputMessage - Message sent to model
  * @param {string} modelName - e.g. gpt-4.1-mini
  * @param {string} apiKey
  * @param {string} endpoint - e.g. https://api.openai.com/v1/chat/completions
  * @param {boolean} showProgressBar - Show progress bar before stream starts
- * @param {"OpenAIOutputStream.ENUM_OpenAI_Type.AzureOpenAI"|"OpenAIOutputStream.ENUM_OpenAI_Type.OpenAI"} apiType
+ * @param {string} focusClass - Will set focus on a class and scroll to it on your page as output is streamed
  * @returns {Promise.<boolean>}
  */
-export async function JS_OpenAI_OutputStream(outputStream, inputMessage, modelName, apiKey, endpoint, showProgressBar, apiType) {
+export async function JS_OpenAI_OutputStream(outputStream, apiType, inputMessage, modelName, apiKey, endpoint, showProgressBar, focusClass) {
 	// BEGIN USER CODE
 let idProg;
 
 let headers = {}
+const targetNode = focusClass ? document.querySelector(focusClass) : null;
 
 if (apiType === "AzureOpenAI") {
     headers = {
@@ -109,6 +111,10 @@ body:JSON.stringify({
                     if (delta) {
                         // Append streamed text into Mendix object
                         outputStream.set("OutputText", outputStream.get("OutputText") + delta);
+                        if (targetNode) {
+                            // Scroll to focused class
+                            targetNode.scrollIntoView({ behavior: 'instant' });
+                        }
                     }
                 } catch (e) {
                     console.error("Failed to parse chunk:", e);
