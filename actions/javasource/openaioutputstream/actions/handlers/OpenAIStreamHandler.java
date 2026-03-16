@@ -1,4 +1,4 @@
-package mlportal.actions.handlers;
+package ex.actions.handlers;
 
 import com.mendix.externalinterface.connector.RequestHandler;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
@@ -60,33 +60,49 @@ public class OpenAIStreamHandler extends RequestHandler {
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setRequestProperty("Authorization", "Bearer " + apiKey);
         conn.setRequestProperty("Accept", "text/event-stream");
-        // conn.setDoOutput(true);
-
-
-        String body = """
-        {
-          "model":"gpt-4.1-mini",
-          "messages":[{"role":"user","content":"Hello"}],
-          "stream":true
+        conn.setDoOutput(true);
+		
+		
+		InputStream openaiStream = servletRequest.getInputStream();
+		OutputStream clientStream = conn.getOutputStream();
+		
+		
+		byte[] buffer = new byte[1024];
+        int bytesRead;
+		
+		
+		while ((bytesRead = openaiStream.read(buffer)) != -1) {
+            clientStream.write(buffer, 0, bytesRead);
+            clientStream.flush();
         }
-        """;
+		
+		int responseCode = conn.getResponseCode(); // OpenAI response
+        servletResponse.setStatus(responseCode);
+		
+		InputStream responseStream = conn.getInputStream(); 
+		
+        if (responseStream != null) {
+			try (OutputStream clientOutput = servletResponse.getOutputStream()) {
+				byte[] bufferRes = new byte[1024];
+                int bytesReadRes;
+                while ((bytesReadRes = responseStream.read(bufferRes)) != -1) {
+                    clientOutput.write(bufferRes, 0, bytesReadRes);
+                    clientOutput.flush();
+                }
+            }
+            servletResponse.flushBuffer();
+        }
 
-        //conn.getOutputStream().write(body.getBytes());
 
-        InputStream openaiStream = conn.getInputStream();
+        /*conn.getOutputStream().write(body.getBytes());
+
+        //InputStream openaiStream = conn.getInputStream();
 		
         response.setContentType("text/event-stream");
         response.addHeader("Cache-Control", "no-cache");
 
-        OutputStream clientStream = response.getOutputStream();
+        //OutputStream clientStream = response.getOutputStream();*/
 
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-
-        while ((bytesRead = openaiStream.read(buffer)) != -1) {
-            clientStream.write(buffer, 0, bytesRead);
-            clientStream.flush();
-        }
 
         openaiStream.close();
         clientStream.close();
