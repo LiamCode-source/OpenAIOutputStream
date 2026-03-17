@@ -41,7 +41,7 @@ public class ASU_OpenAI_StreamProxy extends UserAction<java.lang.Void>
         OpenAIStreamHandler handler = new OpenAIStreamHandler(this.apiKey, this.endpoint, this.modelName);
             
         // Register handler
-        Core.addRequestHandler("ai/stream/", handler);
+        Core.addRequestHandler("ai-stream/", handler);
 		return null;
 		// END USER CODE
 	}

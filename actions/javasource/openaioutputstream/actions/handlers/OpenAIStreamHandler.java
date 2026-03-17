@@ -40,6 +40,14 @@ public class OpenAIStreamHandler extends RequestHandler {
 		
 		if (session == null) {
             Core.getLogger("OpenAIStream").warn("Unauthorised proxy streaming attempt.");
+			servletResponse.setStatus(401);
+            servletResponse.setContentType("application/json");
+			try (OutputStream out = servletResponse.getOutputStream()) {
+                String json = "{\"error\": \"Unauthorised proxy streaming attempt.\"}";
+                out.write(json.getBytes("UTF-8"));
+                out.flush();
+             }
+            servletResponse.flushBuffer();
             return;
         }
 		
@@ -51,6 +59,22 @@ public class OpenAIStreamHandler extends RequestHandler {
         }
 		servletResponse.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         servletResponse.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");	
+		
+		// Handle GET requests
+        if ("GET".equals(servletRequest.getMethod())) {
+            servletResponse.setStatus(HttpServletResponse.SC_OK);
+            servletResponse.setContentType("application/json");
+            try (OutputStream out = servletResponse.getOutputStream()) {
+                String json = "{\"status\": \"ok\", \"proxy\": \"active\"}";
+                out.write(json.getBytes("UTF-8"));
+                out.flush();
+             }
+            servletResponse.flushBuffer();
+            return;
+        }
+		
+		
+		
 		
         URL url = new URL(endpoint);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -104,7 +128,7 @@ public class OpenAIStreamHandler extends RequestHandler {
         //OutputStream clientStream = response.getOutputStream();*/
 
 
-        openaiStream.close();
-        clientStream.close();
+        //openaiStream.close();
+        //clientStream.close();
     }
 }
