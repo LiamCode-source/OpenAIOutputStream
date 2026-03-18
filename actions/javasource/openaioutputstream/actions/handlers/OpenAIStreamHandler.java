@@ -1,4 +1,4 @@
-package ex.actions.handlers;
+package openaioutputstream.actions.handlers;
 
 import com.mendix.externalinterface.connector.RequestHandler;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
@@ -18,12 +18,10 @@ public class OpenAIStreamHandler extends RequestHandler {
 	
 	private final String apiKey;
     private final String endpoint;
-    private final String model;
 
-    public OpenAIStreamHandler(String apiKey, String endpoint, String model) {
+    public OpenAIStreamHandler(String apiKey, String endpoint) {
         this.apiKey = apiKey;
         this.endpoint = endpoint;
-        this.model = model;
     }
 
     @Override

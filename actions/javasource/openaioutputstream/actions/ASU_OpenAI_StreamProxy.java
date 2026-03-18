@@ -7,42 +7,41 @@
 // Other code you write will be lost the next time you deploy the project.
 // Special characters, e.g., é, ö, à, etc. are supported in comments.
 
-package ex.actions;
+package openaioutputstream.actions;
 
 import com.mendix.core.Core;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.systemwideinterfaces.core.UserAction;
-import ex.actions.handlers.OpenAIStreamHandler;
+import openaioutputstream.actions.handlers.OpenAIStreamHandler;
+import com.mendix.webui.CustomJavaAction;
 
-public class ASU_OpenAI_StreamProxy extends UserAction<java.lang.Void>
+/**
+ * Sets up an OpenAI proxy which can be used for streaming responses to user. 
+ * This stops api keys being exposed via nanoflows.
+ */
+public class ASU_OpenAI_StreamProxy extends CustomJavaAction<java.lang.Boolean>
 {
-	private final java.lang.String apiKey;
-	private final java.lang.String modelName;
-	private final java.lang.String endpoint;
+	private java.lang.String apiKey;
+	private java.lang.String endpoint;
 
-	public ASU_OpenAI_StreamProxy(
-		IContext context,
-		java.lang.String _apiKey,
-		java.lang.String _modelName,
-		java.lang.String _endpoint
-	)
+	public ASU_OpenAI_StreamProxy(IContext context, java.lang.String apiKey, java.lang.String endpoint)
 	{
 		super(context);
-		this.apiKey = _apiKey;
-		this.modelName = _modelName;
-		this.endpoint = _endpoint;
+		this.apiKey = apiKey;
+		this.endpoint = endpoint;
 	}
 
 	@java.lang.Override
-	public java.lang.Void executeAction() throws Exception
+	public java.lang.Boolean executeAction() throws Exception
 	{
 		// BEGIN USER CODE
 		// Create and register OpenAI proxy handler to send requests to
-        OpenAIStreamHandler handler = new OpenAIStreamHandler(this.apiKey, this.endpoint, this.modelName);
+        OpenAIStreamHandler handler = new OpenAIStreamHandler(this.apiKey, this.endpoint);
             
         // Register handler
         Core.addRequestHandler("ai-stream/", handler);
-		return null;
+		if (handler == null) return false;
+		else return true;
 		// END USER CODE
 	}
 
