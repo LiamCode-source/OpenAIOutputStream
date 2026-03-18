@@ -12,17 +12,25 @@ import { Big } from "big.js";
 // END EXTRA CODE
 
 /**
- * Allows customised JSON to be sent to the AI. To stream output, ensure the stream parameter is added to the JSON.
- * @param {MxObject} outputStream
+ * ========
+ * IMPORTANT
+ * ========
+ * Using this JS action exposes the API key to the client side. Therefore if end users should not have access to the OpenAI key(s), then the newer actions which use the OpenAI Stream Proxy should be used instead
+ * 
+ * 
+ * 
+ * Takes a text input and streams out the output
+ * @param {MxObject} outputStream - Object that stores output text
  * @param {"OpenAIOutputStream.ENUM_OpenAI_Type.AzureOpenAI"|"OpenAIOutputStream.ENUM_OpenAI_Type.OpenAI"} apiType
- * @param {string} inputJSON - JSON sent to AI
+ * @param {string} inputMessage - Message sent to model
+ * @param {string} modelName - e.g. gpt-4.1-mini
  * @param {string} apiKey
  * @param {string} endpoint - e.g. https://api.openai.com/v1/chat/completions
  * @param {boolean} showProgressBar - Show progress bar before stream starts
  * @param {string} focusClass - Will set focus on a class and scroll to it on your page as output is streamed
  * @returns {Promise.<boolean>}
  */
-export async function JS_OpenAI_OutputFromJson(outputStream, apiType, inputJSON, apiKey, endpoint, showProgressBar, focusClass) {
+export async function JS_OpenAI_OutputStream(outputStream, apiType, inputMessage, modelName, apiKey, endpoint, showProgressBar, focusClass) {
 	// BEGIN USER CODE
 let idProg;
 
@@ -56,7 +64,13 @@ const response = await fetch(endpoint, {
 
 method: "POST",
 headers: headers,
-body: inputJSON
+body:JSON.stringify({
+      "model": modelName,
+      "messages": [
+        { "role": "user", "content": inputMessage }
+      ],
+      "stream": true
+    })
 })
 
 
