@@ -73,9 +73,6 @@ public class OpenAIStreamHandler extends RequestHandler {
             return;
         }
 		
-		
-		
-		
         URL url = new URL(endpoint);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
@@ -103,7 +100,9 @@ public class OpenAIStreamHandler extends RequestHandler {
 		int responseCode = conn.getResponseCode(); // OpenAI response
         servletResponse.setStatus(responseCode);
 		
-		InputStream responseStream = conn.getInputStream(); 
+		InputStream responseStream = (responseCode >= 200 && responseCode < 300) 
+                    ? conn.getInputStream() 
+                    : conn.getErrorStream();
 		
         if (responseStream != null) {
 			try (OutputStream clientOutput = servletResponse.getOutputStream()) {
@@ -116,19 +115,5 @@ public class OpenAIStreamHandler extends RequestHandler {
             }
             servletResponse.flushBuffer();
         }
-
-
-        /*conn.getOutputStream().write(body.getBytes());
-
-        //InputStream openaiStream = conn.getInputStream();
-		
-        response.setContentType("text/event-stream");
-        response.addHeader("Cache-Control", "no-cache");
-
-        //OutputStream clientStream = response.getOutputStream();*/
-
-
-        //openaiStream.close();
-        //clientStream.close();
     }
 }
