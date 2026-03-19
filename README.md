@@ -17,9 +17,11 @@ This stops api keys being exposed via nanoflows.
 
 ## Java Actions
 
-- **ASU_OpenAI_StreamProxy**: Sets up an OpenAI proxy which can be used for streaming responses to user. 
+- **ASU_OpenAI_StreamProxy**: Use this in your after startup microflow. This sets up an OpenAI proxy which can be used for streaming responses to user. 
 This stops api keys being exposed via nanoflows.
 
+</br>
+</br>
 
 ## Legacy JS Actions
 
