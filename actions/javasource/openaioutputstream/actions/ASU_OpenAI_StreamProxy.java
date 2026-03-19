@@ -23,12 +23,14 @@ public class ASU_OpenAI_StreamProxy extends CustomJavaAction<java.lang.Boolean>
 {
 	private java.lang.String apiKey;
 	private java.lang.String endpoint;
+	private openaioutputstream.proxies.ENUM_OpenAI_Type apiType;
 
-	public ASU_OpenAI_StreamProxy(IContext context, java.lang.String apiKey, java.lang.String endpoint)
+	public ASU_OpenAI_StreamProxy(IContext context, java.lang.String apiKey, java.lang.String endpoint, java.lang.String apiType)
 	{
 		super(context);
 		this.apiKey = apiKey;
 		this.endpoint = endpoint;
+		this.apiType = apiType == null ? null : openaioutputstream.proxies.ENUM_OpenAI_Type.valueOf(apiType);
 	}
 
 	@java.lang.Override
@@ -36,7 +38,7 @@ public class ASU_OpenAI_StreamProxy extends CustomJavaAction<java.lang.Boolean>
 	{
 		// BEGIN USER CODE
 		// Create and register OpenAI proxy handler to send requests to
-        OpenAIStreamHandler handler = new OpenAIStreamHandler(this.apiKey, this.endpoint);
+        OpenAIStreamHandler handler = new OpenAIStreamHandler(this.apiKey, this.endpoint, this.apiType);
             
         // Register handler
         Core.addRequestHandler("ai-stream/", handler);

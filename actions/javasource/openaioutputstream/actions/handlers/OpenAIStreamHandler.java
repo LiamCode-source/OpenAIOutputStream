@@ -18,10 +18,12 @@ public class OpenAIStreamHandler extends RequestHandler {
 	
 	private final String apiKey;
     private final String endpoint;
+	private openaioutputstream.proxies.ENUM_OpenAI_Type apiType;
 
-    public OpenAIStreamHandler(String apiKey, String endpoint) {
+    public OpenAIStreamHandler(String apiKey, String endpoint, openaioutputstream.proxies.ENUM_OpenAI_Type apiType) {
         this.apiKey = apiKey;
         this.endpoint = endpoint;
+		this.apiType = apiType;
     }
 
     @Override
@@ -77,7 +79,8 @@ public class OpenAIStreamHandler extends RequestHandler {
 
         conn.setRequestMethod(servletRequest.getMethod()); // e.g. POST
         conn.setRequestProperty("Content-Type", "application/json");
-        conn.setRequestProperty("Authorization", "Bearer " + apiKey);
+		if (apiType == openaioutputstream.proxies.ENUM_OpenAI_Type.AzureOpenAI)  conn.setRequestProperty("api-key", apiKey);
+		else conn.setRequestProperty("Authorization", "Bearer " + apiKey); // Default formatting for OpenAI
         conn.setRequestProperty("Accept", "text/event-stream");
         conn.setDoOutput(true);
 		
