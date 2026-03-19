@@ -12,6 +12,7 @@ import { Big } from "big.js";
 // END EXTRA CODE
 
 /**
+ * Uses the OpenAI proxy to take a text input and streams out the output
  * @param {MxObject} outputStream
  * @param {string} inputMessage
  * @param {string} modelName
@@ -24,9 +25,7 @@ export async function JS_OpenAI_ProxyStream(outputStream, inputMessage, modelNam
 	let idProg;
 	const targetNode = focusClass ? document.querySelector(focusClass) : null;
 
-	if (showProgressBar) {
-		idProg = mx.ui.showProgress("Thinking...", false);
-	}
+	if (showProgressBar) idProg = mx.ui.showProgress("Thinking...", false);
 	// Call Mendix streaming proxy
 	const response = await fetch("/ai-stream/", {
 		method: "POST",
@@ -45,6 +44,7 @@ export async function JS_OpenAI_ProxyStream(outputStream, inputMessage, modelNam
 	// Error check
 	if (!response.ok || !response.body) {
 		const errorText = await response.text().catch(() => "");
+		if (showProgressBar) mx.ui.hideProgress(Number(idProg));
 		console.error("Stream request failed", errorText);
 		return false;
 	}

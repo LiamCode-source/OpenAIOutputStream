@@ -12,6 +12,7 @@ import { Big } from "big.js";
 // END EXTRA CODE
 
 /**
+ * Uses the OpenAI proxy to allow customised JSON to be sent to the AI. To stream output, ensure the stream parameter is added to the JSON.
  * @param {MxObject} outputStream
  * @param {string} inputJSON
  * @param {boolean} showProgressBar
@@ -23,9 +24,7 @@ export async function JS_OpenAI_ProxyStreamFromJson(outputStream, inputJSON, sho
 	let idProg;
 	const targetNode = focusClass ? document.querySelector(focusClass) : null;
 
-	if (showProgressBar) {
-		idProg = mx.ui.showProgress("Thinking...", false);
-	}
+	if (showProgressBar) idProg = mx.ui.showProgress("Thinking...", false);
 	// Call Mendix streaming proxy
 	const response = await fetch("/ai-stream/", {
 		method: "POST",
@@ -38,6 +37,7 @@ export async function JS_OpenAI_ProxyStreamFromJson(outputStream, inputJSON, sho
 	// Error check
 	if (!response.ok || !response.body) {
 		const errorText = await response.text().catch(() => "");
+		if (showProgressBar) mx.ui.hideProgress(Number(idProg));
 		console.error("Stream request failed", errorText);
 		return false;
 	}
