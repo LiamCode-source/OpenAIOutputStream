@@ -39,6 +39,14 @@ public class OpenAIStreamHandler extends RequestHandler {
         HttpServletResponse servletResponse = response.getHttpServletResponse();
 		
 		ISession session = getSessionFromRequest(request); // Checks for authentic user session
+
+		// OPTIONS requests without auth
+		if ("OPTIONS".equals(servletRequest.getMethod())) {
+			servletResponse.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			servletResponse.flushBuffer();
+            return;
+		}
+		
 		
 		if (session == null) {
             Core.getLogger("OpenAIStream").warn("Unauthorised proxy streaming attempt.");
