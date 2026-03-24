@@ -1,4 +1,4 @@
-# OpenAIOutputStream - Version 2.0
+# OpenAIOutputStream - Version 2.1
 Mendix module used for streaming OpenAI outputs.
 
 Using the REST API action for OpenAI in Mendix is the perfect solution... until you need to stream the output.
@@ -17,8 +17,7 @@ This stops api keys being exposed via nanoflows.
 
 ## Java Actions
 
-- **ASU_OpenAI_StreamProxy**: Use this in your after startup microflow. This sets up an OpenAI proxy which can be used for streaming responses to user. 
-This stops api keys being exposed via nanoflows.
+- **ASU_OpenAI_StreamProxy**: Use this in your after startup microflow. This sets up an OpenAI proxy which can be used for streaming responses to user. This stops api keys being exposed via nanoflows. *You can provide a max request body size (in KB) if you want to limit requests sizes*
 
 </br>
 </br>
