@@ -19,11 +19,13 @@ public class OpenAIStreamHandler extends RequestHandler {
 	private final String apiKey;
     private final String endpoint;
 	private openaioutputstream.proxies.ENUM_OpenAI_Type apiType;
+	private final int maxRequestSize;
 
-    public OpenAIStreamHandler(String apiKey, String endpoint, openaioutputstream.proxies.ENUM_OpenAI_Type apiType) {
+    public OpenAIStreamHandler(String apiKey, String endpoint, openaioutputstream.proxies.ENUM_OpenAI_Type apiType, int maxRequestSize) {
         this.apiKey = apiKey;
         this.endpoint = endpoint;
 		this.apiType = apiType;
+		this.maxRequestSize = maxRequestSize;
     }
 
     @Override
@@ -75,7 +77,9 @@ public class OpenAIStreamHandler extends RequestHandler {
 		
         URL url = new URL(endpoint);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
+		
+		conn.setConnectTimeout(5000); // Time to establish connection ms
+		conn.setReadTimeout(60000); // Time to read stream ms
 
         conn.setRequestMethod(servletRequest.getMethod()); // e.g. POST
         conn.setRequestProperty("Content-Type", "application/json");
@@ -84,7 +88,6 @@ public class OpenAIStreamHandler extends RequestHandler {
         conn.setRequestProperty("Accept", "text/event-stream");
         conn.setDoOutput(true);
 		
-		
 		InputStream openaiStream = servletRequest.getInputStream();
 		OutputStream clientStream = conn.getOutputStream();
 		
@@ -92,9 +95,18 @@ public class OpenAIStreamHandler extends RequestHandler {
 		byte[] buffer = new byte[1024];
         int bytesRead;
 		
+		int MAX_BODY_BYTES = 1024 * maxRequestSize;
+		int totalBytes = 0;
+		
 		
 		while ((bytesRead = openaiStream.read(buffer)) != -1) {
-            clientStream.write(buffer, 0, bytesRead);
+			totalBytes += bytesRead;
+			if (totalBytes > MAX_BODY_BYTES) {
+				Core.getLogger("OpenAIStream").warn("Request body too big.");
+				servletResponse.setStatus(413);
+				return;
+			}
+			clientStream.write(buffer, 0, bytesRead);
             clientStream.flush();
         }
 		
