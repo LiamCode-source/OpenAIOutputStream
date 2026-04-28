@@ -18,10 +18,10 @@ public class OpenAIStreamHandler extends RequestHandler {
 	
 	private final String apiKey;
     private final String endpoint;
-	private openaioutputstream.proxies.ENUM_OpenAI_Type apiType;
+	private openaioutputstream.proxies.ENUM_AI_Type apiType;
 	private final int maxRequestSize;
 
-    public OpenAIStreamHandler(String apiKey, String endpoint, openaioutputstream.proxies.ENUM_OpenAI_Type apiType, int maxRequestSize) {
+    public OpenAIStreamHandler(String apiKey, String endpoint, openaioutputstream.proxies.ENUM_AI_Type apiType, int maxRequestSize) {
         this.apiKey = apiKey;
         this.endpoint = endpoint;
 		this.apiType = apiType;
@@ -91,9 +91,15 @@ public class OpenAIStreamHandler extends RequestHandler {
 
         conn.setRequestMethod(servletRequest.getMethod()); // e.g. POST
         conn.setRequestProperty("Content-Type", "application/json");
-		if (apiType == openaioutputstream.proxies.ENUM_OpenAI_Type.AzureOpenAI)  conn.setRequestProperty("api-key", apiKey);
+		if (apiType == openaioutputstream.proxies.ENUM_AI_Type.AzureOpenAI)  conn.setRequestProperty("api-key", apiKey);
+		
+		else if (apiType == openaioutputstream.proxies.ENUM_AI_Type.Anthropic) {
+			conn.setRequestProperty("x-api-key", apiKey);
+			conn.setRequestProperty("anthropic-version", "2023-06-01");
+			//conn.setRequestProperty("anthropic-beta", "interleaved-thinking-2025-05-14"); // Extended thinking
+		}	
 		else conn.setRequestProperty("Authorization", "Bearer " + apiKey); // Default formatting for OpenAI
-        conn.setRequestProperty("Accept", "text/event-stream");
+        conn.setRequestProperty("Accept", "text/event-stream, application/json");
         conn.setDoOutput(true);
 		
 		InputStream openaiStream = servletRequest.getInputStream();
