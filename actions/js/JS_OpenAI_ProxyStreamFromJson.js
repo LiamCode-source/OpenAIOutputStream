@@ -17,12 +17,16 @@ import { Big } from "big.js";
  * @param {string} inputJSON
  * @param {boolean} showProgressBar
  * @param {string} focusClass
+ * @param {Big} commitInterval - How often output stream object is committed (ms). Default is 50ms
  * @returns {Promise.<boolean>}
  */
-export async function JS_OpenAI_ProxyStreamFromJson(outputStream, inputJSON, showProgressBar, focusClass) {
+export async function JS_OpenAI_ProxyStreamFromJson(outputStream, inputJSON, showProgressBar, focusClass, commitInterval) {
 	// BEGIN USER CODE
 	let idProg;
 	const targetNode = focusClass ? document.querySelector(focusClass) : null;
+
+	// Default interval to 50 if not provided
+	commitInterval = commitInterval > 0 ? commitInterval : 50;
 
 	if (showProgressBar) idProg = mx.ui.showProgress("Thinking...", false);
 	// Call Mendix streaming proxy
@@ -54,6 +58,25 @@ export async function JS_OpenAI_ProxyStreamFromJson(outputStream, inputJSON, sho
 	outputStream.set("OutputText", "");
 
 	let buffer = ""; // Helps reduce chunk parse error
+	let localText = "";      // Local accumulator
+    let commitPending = false;
+
+    // Commit on a throttle
+	// Commit so Mendix UI updates
+    const scheduleCommit = () => {
+        if (commitPending) return;
+        commitPending = true;
+        setTimeout(() => {
+            outputStream.set("OutputText", localText);
+            mx.data.commit({
+                mxobj: outputStream,
+                callback: () => { commitPending = false; },
+				error: () => { commitPending = false; }
+            });
+	    	// Scroll to focused class
+            if (targetNode) targetNode.scrollIntoView({ behavior: "instant" });
+			}, commitInterval); // Commit interval in ms
+    };
 
 	while (!streamComplete) {
 		const { value, done } = await reader.read();
@@ -85,27 +108,13 @@ export async function JS_OpenAI_ProxyStreamFromJson(outputStream, inputJSON, sho
 				const delta = parsed.choices?.[0]?.delta?.content;
 
 				if (delta) {
-					const current = outputStream.get("OutputText") || "";
-					outputStream.set("OutputText", current + delta);
-					if (targetNode) {
-                        // Scroll to focused class
-                        targetNode.scrollIntoView({ behavior: 'instant' });
-                    }
-
+					localText += delta;
+					scheduleCommit();
 				}
-
 			} catch (e) {
 				console.warn("Chunk parse error", e);
 			}
 		}
-
-		// Commit so Mendix UI updates
-		await new Promise(resolve => {
-			mx.data.commit({
-				mxobj: outputStream,
-				callback: resolve
-			});
-		});
 	}
 	// Flush decorder
 	buffer += decoder.decode();
