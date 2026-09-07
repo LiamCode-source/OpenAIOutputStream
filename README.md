@@ -1,4 +1,9 @@
-# OpenAIOutputStream - Version 2.2
+# OpenAIOutputStream - Version 3.0
+<p>
+  <img src="./MicroflowExample.png" alt="Microflow using output stream action being used" height="140">
+</p>
+
+
 Mendix module used for streaming OpenAI and Anthropic outputs.
 
 Using the REST API action for AI models in Mendix is the ideal solution... until you need to stream the output.
